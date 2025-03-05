@@ -1,0 +1,12 @@
+.*
+!.gitignore
+!.gitlab-ci.yml
+!.gitlab-ci-t1.yml
+!.golangci.yml
+!.editorconfig
+!.gitlab
+!.gitmodules
+!.helm
+!.helm/*
+
+tmp
