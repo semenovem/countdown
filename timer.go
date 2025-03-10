@@ -1,29 +1,20 @@
 package countdown
 
 import (
-	"context"
 	"time"
 )
 
 type Timer struct {
-	c    chan struct{}
-	ctx  context.Context
-	d    time.Duration
-	stop bool
+	c   chan struct{}
+	d   time.Duration
+	ind int
 }
 
-func NewTimer(ctx context.Context, d time.Duration) *Timer {
+func NewTimer(d time.Duration) *Timer {
 	t := &Timer{
-		c:   make(chan struct{}),
-		d:   d,
-		ctx: ctx,
+		c: make(chan struct{}),
+		d: d,
 	}
-
-	go func() {
-		<-ctx.Done()
-		t.stop = true
-		t.c = nil
-	}()
 
 	return t
 }
@@ -33,9 +24,12 @@ func (t *Timer) Start() {
 		panic("timer not initialized")
 	}
 
+	i := t.ind
+
 	go func() {
-		time.Sleep(t.d)
-		if t.ctx.Err() == nil && !t.stop {
+		<-time.After(t.d)
+
+		if i == t.ind {
 			t.c <- struct{}{}
 		}
 	}()
@@ -45,12 +39,13 @@ func (t *Timer) Stop() {
 	if t.c == nil {
 		panic("timer not initialized")
 	}
-	t.stop = true
+
+	t.ind++
 }
 
 func (t *Timer) C() <-chan struct{} {
 	if t.c == nil {
-		t.c = make(chan struct{})
+		panic("timer not initialized")
 	}
 
 	return t.c
